@@ -236,7 +236,7 @@ if (isset($_GET['edit'])) {
                                         <td><?php echo htmlspecialchars($k['status']); ?></td>
                                         <td><?php echo htmlspecialchars($k['sort_order']); ?></td>
                                         <td>
-                                            <a href="kategori.php?edit=<?php echo $k['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
+                                            <a href="kategori.php?edit=<?php echo $k['id']; ?>" class="btn btn-sm btn-primary">Ganti</a>
                                             <a href="kategori.php?hapus=<?php echo $k['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus kategori ini?')">Hapus</a>
                                         </td>
                                     </tr>
