@@ -175,8 +175,8 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
                                         <td><?php echo htmlspecialchars($r['jumlah_anggota']); ?></td>
                                         <td><?php echo formatDate($r['tanggal_pemesanan']); ?></td>
                                         <td>
-                                            <a href="reservation.php?edit=<?php echo $r['id']; ?>" class="btn btn-primary btn-sm">Edit</a>
-                                            <a href="reservation.php?delete=<?php echo $r['id']; ?>" class="btn btn-danger btn-sm">Hapus</a>
+                                            <a href="reservation.php?edit=<?php echo $r['id']; ?>" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                            <a href="reservation.php?delete=<?php echo $r['id']; ?>" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></a>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>

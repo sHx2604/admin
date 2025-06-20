@@ -239,7 +239,7 @@ if (isset($_GET['edit'])) {
                         <td><?= htmlspecialchars($user['password']) ?></td>
                         <td><?= htmlspecialchars($user['role']) ?></td>
                         <td>
-                            <a href="user.php?edit=<?= $user['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="user.php?edit=<?= $user['id'] ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
                         </td>
                     </tr>
                     <?php endforeach; ?>
