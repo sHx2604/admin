@@ -24,10 +24,9 @@ if (isset($_POST['submit_edit'])) {
     $password = $_POST['password'];
     $role = $_POST['role'];
 
-    // Hash password sebelum update
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    // Simpan password tanpa hash
     $stmt = $pdo->prepare("UPDATE users SET full_name=?, username=?, password=?, role=? WHERE id=?");
-    $stmt->execute([$full_name, $username, $hashedPassword, $role, $id]);
+    $stmt->execute([$full_name, $username, $password, $role, $id]);
     header("Location: user.php");
     exit;
 }
@@ -51,7 +50,7 @@ if (isset($_GET['edit'])) {
 
 <head>
     <meta charset="utf-8">
-    <title>DASHMIN - Bootstrap Admin Template</title>
+    <title>TRINITY SYSTEM</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -94,7 +93,8 @@ if (isset($_GET['edit'])) {
         <div class="sidebar pe-4 pb-3">
             <nav class="navbar bg-light navbar-light">
                 <a href="index.html" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>DASHMIN</h3>
+                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> 
+  TRINITY</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -109,12 +109,12 @@ if (isset($_GET['edit'])) {
                 <div class="navbar-nav w-100">
                     
                     <a href="../admin/dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
-                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Menu</a>
-                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-usd me-2"></i>Transaksi</a>
+                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
+                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
                     <a href="../admin/kategori.php" class="nav-item nav-link"><i class="fa fa-check-square me-2"></i>Kategori</a>
-                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-handshake-o me-2"></i>Reservasi</a>
+                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
                     <a href="../admin/user.php" class="nav-item nav-link"><i class="fa fa-users me-2"></i>User</a>
-                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-bar-chart me-2"></i>Laporan</a>
+                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-chart-line me-2"></i>Laporan</a>
                     <a href="../admin/pos.php" class="nav-item nav-link active"><i class="fa fa-university me-2"></i>Kasir</a>
                     
                 </div>
@@ -128,7 +128,7 @@ if (isset($_GET['edit'])) {
             <!-- Navbar Start -->
             <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
                 <a href="index.html" class="navbar-brand d-flex d-lg-none me-4">
-                    <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>
+                    <h2 class="text-primary mb-0"><i class="fa fa-store"></i></h2>
                 </a>
                 <a href="#" class="sidebar-toggler flex-shrink-0">
                     <i class="fa fa-bars"></i>
@@ -195,7 +195,7 @@ if (isset($_GET['edit'])) {
                 </div>
                 <div class="mb-3">
                     <label>Password (Ulangi)</label>
-                    <input type="password" name="password" class="form-control" required value ="<? = $edit_user['password'] ?>">
+                    <input type="password" name="password" class="form-control" required value ="<?= $edit_user['password'] ?>">
                 </div>
                 <div class="mb-3">
                     <label>Role</label><br>
@@ -239,7 +239,7 @@ if (isset($_GET['edit'])) {
                         <td><?= htmlspecialchars($user['password']) ?></td>
                         <td><?= htmlspecialchars($user['role']) ?></td>
                         <td>
-                            <a href="user.php?edit=<?= $user['id'] ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
+                            <a href="user.php?edit=<?= $user['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
                         </td>
                     </tr>
                     <?php endforeach; ?>

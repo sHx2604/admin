@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../admin/config/database.php';
-require_once '../admin/includes/functions.php';
+require_once 'config/database.php';
+require_once 'includes/functions.php';
 
 requireLogin();
 
@@ -31,12 +31,28 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
         $saleId = $pdo->lastInsertId();
 
         foreach ($cartItems as $item) {
-            $stmt = $pdo->prepare("INSERT INTO sale_items (sale_id, product_id, quantity, price, total) VALUES (?, ?, ?, ?, ?)");
-            $itemTotal = $item['price'] * $item['quantity'];
-            $stmt->execute([$saleId, $item['id'], $item['quantity'], $item['price'], $itemTotal]);
+            // Ambil data produk dari database untuk validasi harga dan stok
+            $product = getProductById($item['id']);
+            $productName = $product['name'];
+            $sku = isset($product['sku_product']) ? $product['sku_product'] : '';
+            $dbPrice = $product['price'];
+            $dbStock = $product['stock'];
+            $qty = $item['quantity'];
+
+            // Validasi harga dan stok
+            if ($dbPrice != $item['price']) {
+                throw new Exception('Harga produk tidak valid.');
+            }
+            if ($dbStock < $qty) {
+                throw new Exception('Stok produk tidak cukup.');
+            }
+
+            $stmt = $pdo->prepare("INSERT INTO sale_items (sale_id, product_id, product_name, sku_product, quantity, price, total) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $itemTotal = $dbPrice * $qty;
+            $stmt->execute([$saleId, $item['id'], $productName, $sku, $qty, $dbPrice, $itemTotal]);
 
             $stmt = $pdo->prepare("UPDATE products SET stock = stock - ? WHERE id = ?");
-            $stmt->execute([$item['quantity'], $item['id']]);
+            $stmt->execute([$qty, $item['id']]);
         }
 
        $pdo->commit();
@@ -60,7 +76,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
 
 <head>
     <meta charset="utf-8">
-    <title>DASHMIN - Bootstrap Admin Template</title>
+    <title>TRINITY SYSTEM</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -103,7 +119,8 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
         <div class="sidebar pe-4 pb-3">
             <nav class="navbar bg-light navbar-light">
                 <a href="index.html" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>DASHMIN</h3>
+                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> 
+  TRINITY</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -117,12 +134,12 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
                 </div>
                 <div class="navbar-nav w-100">
                     <a href="../admin/dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
-                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Menu</a>
-                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-usd me-2"></i>Transaksi</a>
+                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
+                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
                     <a href="../admin/kategori.php" class="nav-item nav-link"><i class="fa fa-check-square me-2"></i>Kategori</a>
-                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-handshake-o me-2"></i>Reservasi</a>
+                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
                     <a href="../admin/user.php" class="nav-item nav-link"><i class="fa fa-users me-2"></i>User</a>
-                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-bar-chart me-2"></i>Laporan</a>
+                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-chart-line me-2"></i>Laporan</a>
                     <a href="../admin/pos.php" class="nav-item nav-link active"><i class="fa fa-university me-2"></i>Kasir</a>
                     
                 </div>
@@ -136,7 +153,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
             <!-- Navbar Start -->
             <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
                 <a href="index.html" class="navbar-brand d-flex d-lg-none me-4">
-                    <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>
+                    <h2 class="text-primary mb-0"><i class="fa fa-store"></i></h2>
                 </a>
                 <a href="#" class="sidebar-toggler flex-shrink-0">
                     <i class="fa fa-bars"></i>
@@ -157,7 +174,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
 
 
             <!-- Blank Start -->
-        <div class="container-fluid pt-4 px-4">
+      <div class="container-fluid pt-4 px-4">
                
 
             <!-- Alert -->

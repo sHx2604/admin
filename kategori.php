@@ -61,7 +61,7 @@ if (isset($_GET['edit'])) {
 
 <head>
     <meta charset="utf-8">
-    <title>DASHMIN - Bootstrap Admin Template</title>
+    <title>TRINITY SYSTEM</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -104,7 +104,8 @@ if (isset($_GET['edit'])) {
         <div class="sidebar pe-4 pb-3">
             <nav class="navbar bg-light navbar-light">
                 <a href="index.html" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>DASHMIN</h3>
+                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> 
+  TRINITY</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -119,12 +120,12 @@ if (isset($_GET['edit'])) {
                 <div class="navbar-nav w-100">
                     
                    <a href="../admin/dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
-                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Menu</a>
-                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-usd me-2"></i>Transaksi</a>
+                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
+                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
                     <a href="../admin/kategori.php" class="nav-item nav-link active"><i class="fa fa-check-square me-2"></i>Kategori</a>
-                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-handshake-o me-2"></i>Reservasi</a>
+                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
                     <a href="../admin/user.php" class="nav-item nav-link"><i class="fa fa-users me-2"></i>User</a>
-                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-bar-chart me-2"></i>Laporan</a>
+                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-chart-line me-2"></i>Laporan</a>
                     <a href="../admin/pos.php" class="nav-item nav-link"><i class="fa fa-university me-2"></i>Kasir</a>
                     
                 </div>
@@ -138,7 +139,7 @@ if (isset($_GET['edit'])) {
             <!-- Navbar Start -->
             <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
                 <a href="index.html" class="navbar-brand d-flex d-lg-none me-4">
-                    <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>
+                    <h2 class="text-primary mb-0"><i class="fa fa-store"></i></h2>
                 </a>
                 <a href="#" class="sidebar-toggler flex-shrink-0">
                     <i class="fa fa-bars"></i>
@@ -236,8 +237,8 @@ if (isset($_GET['edit'])) {
                                         <td><?php echo htmlspecialchars($k['status']); ?></td>
                                         <td><?php echo htmlspecialchars($k['sort_order']); ?></td>
                                         <td>
-                                            <a href="kategori.php?edit=<?php echo $k['id']; ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
-                                            <a href="kategori.php?hapus=<?php echo $k['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus kategori ini?')"><i class="fas fa-trash"></i></a>
+                                            <a href="kategori.php?edit=<?php echo $k['id']; ?>" class="btn btn-sm btn-primary">Edit</a>
+                                            <a href="kategori.php?hapus=<?php echo $k['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin hapus kategori ini?')">Hapus</a>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>

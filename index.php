@@ -1,25 +1,26 @@
 <?php
 session_start();
-require_once '../admin/config/database.php';
-require_once '../admin/includes/functions.php';
+require_once 'config/database.php';
+require_once 'includes/functions.php';
+$error='';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+
+        if 
+        (authUser($username, $password)) {
+        header("Location: dashboard.php");
+        exit();
+        } 
+        else {
+        $error = 'Login gagal. Periksa username, password, atau status akun.';
+        }
+    }
 
 // Redirect to dashboard if already logged in
 if (isset($_SESSION['user_id'])) {
     header('Location: dashboard.php');
     exit();
-}
-
-$error = '';
-if ($_POST) {
-    $username = trim($_POST['username']);
-    $password = $_POST['password'];
-
-    if (authenticateUser($username, $password)) {
-        header('Location: dashboard.php');
-        exit();
-    } else {
-        $error = 'Username atau password salah!';
-    }
 }
 ?>
 <!DOCTYPE html>

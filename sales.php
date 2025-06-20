@@ -1,9 +1,18 @@
+<?php
+session_start();
+require_once '../admin/config/database.php';
+require_once '../admin/includes/functions.php';
+
+requireLogin();
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>DASHMIN - Bootstrap Admin Template</title>
+    <title>TRINITY SYSTEM</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -46,7 +55,8 @@
         <div class="sidebar pe-4 pb-3">
             <nav class="navbar bg-light navbar-light">
                 <a href="index.html" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>DASHMIN</h3>
+                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> 
+  TRINITY</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -54,18 +64,19 @@
                         <div class="bg-success rounded-circle border border-2 border-white position-absolute end-0 bottom-0 p-1"></div>
                     </div>
                     <div class="ms-3">
-                        <h6 class="mb-0">Jhon Doe</h6>
-                        <span>Admin</span>
+                        <h6 class="mb-0"><?php echo $_SESSION['full_name']; ?></h6>
+                        <span><?php echo $_SESSION['role']; ?></span>
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    <a href="index.html" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
-                    <a href="menu.html" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Menu</a>
-                    <a href="transaction.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Transaksi</a>
-                    <a href="user.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>User</a>
-                    <a href="reservation.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Reservasi</a>
-                    <a href="sell.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Penjualan</a>
-                    <a href="export.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Export</a>
+                   <a href="dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
+                    <a href="menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
+                    <a href="transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
+                    <a href="kategori.php" class="nav-item nav-link"><i class="fa fa-check-square me-2"></i>Kategori</a>
+                    <a href="reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
+                    <a href="user.php" class="nav-item nav-link"><i class="fa fa-users me-2"></i>User</a>
+                    <a href="sales.php" class="nav-item nav-link active"><i class="fa fa-chart-line me-2"></i>Laporan</a>
+                    <a href="pos.php" class="nav-item nav-link"><i class="fa fa-university me-2"></i>Kasir</a>
                     
                 </div>
             </nav>
@@ -78,7 +89,7 @@
             <!-- Navbar Start -->
             <nav class="navbar navbar-expand bg-light navbar-light sticky-top px-4 py-0">
                 <a href="index.html" class="navbar-brand d-flex d-lg-none me-4">
-                    <h2 class="text-primary mb-0"><i class="fa fa-hashtag"></i></h2>
+                    <h2 class="text-primary mb-0"><i class="fa fa-store"></i></h2>
                 </a>
                 <a href="#" class="sidebar-toggler flex-shrink-0">
                     <i class="fa fa-bars"></i>
@@ -90,7 +101,7 @@
                     <div class="nav-item dropdown">
                         <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                             <img class="rounded-circle me-lg-2" src="img/user.jpg" alt="" style="width: 40px; height: 40px;">
-                            <span class="d-none d-lg-inline-flex">John Doe</span>
+                            <span class="d-none d-lg-inline-flex"><?php echo $_SESSION['full_name']; ?></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                             <a href="#" class="dropdown-item">My Profile</a>
@@ -104,31 +115,27 @@
 
 
             <!-- Blank Start -->
-            <div class="container-fluid pt-4 px-4">
-                 <div class="container-fluid pt-4 px-4">
-                <div class="row g-4">
+            <div class="row g-4">
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-light rounded h-100 p-4">
-                            <h6 class="mb-4">Penjualan Hari ini</h6>
-                            <canvas id="line-penjualan"></canvas>
+                            <h6 class="mb-4">Kurva Penjualan Perhari</h6>
+                            <canvas id="line-chart" style="display: block; box-sizing: border-box; height: 212.8px; width: 425.6px;" width="532" height="266"></canvas>
                         </div>
-                
-                 <div class="container-fluid pt-4 px-4">
-                <div class="row g-4">
+                    </div>
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-light rounded h-100 p-4">
-                            <h6 class="mb-4">Jumlah Reservasi </h6>
-                            <canvas id="line-reservasi"></canvas>
+                            <h6 class="mb-4">Jumlah Reservasi</h6>
+                            <canvas id="line-chart" style="display: block; box-sizing: border-box; height: 212.8px; width: 425.6px;" width="532" height="266"></canvas>
                         </div>
-
-                 <div class="container-fluid pt-4 px-4">
-                <div class="row g-4">
+                    </div>
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-light rounded h-100 p-4">
-                            <h6 class="mb-4">Transaksi Produk</h6>
-                            <canvas id="line-produk"></canvas>
+                            <h6 class="mb-4">Produk Terjual</h6>
+                            <canvas id="line-chart" style="display: block; box-sizing: border-box; height: 212.8px; width: 425.6px;" width="532" height="266"></canvas>
                         </div>
-            </div>
+                    </div>
+                    
+                </div>
             <!-- Bl End -->
         </div>
         <!-- Content End -->
