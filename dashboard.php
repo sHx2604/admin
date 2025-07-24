@@ -227,33 +227,35 @@ foreach ($reservasi as $r):
                             </table>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Sales Chart Start -->
-            <div class="container-fluid pt-4 px-4">
-                <div class="row g-4">
-                    
-                     <div class="col-12">
-                        <div class="bg-light rounded h-100 p-4">
-                            <div class="table-responsive">
-                                <h6 class="mb-0">Pembeli &amp; Penjualan</h6>
-                                <a href="">Show All</a>
+                    <div class="col-sm-12 col-xl-6">
+                        <div class="bg-light rounded p-4" style="min-height: 450px;">
+                            <h6 class="mb-4">Top 5 Produk Terjual</h6>
+                            <div class="chart-container">
+                                <canvas id="products-chart" style="display: block; box-sizing: border-box; height: 400px; width: 425.6px;" width="532" height="500"></canvas>
                             </div>
-                            <canvas id="worldwide-sales" style="display: block; box-sizing: border-box; height: 210.4px; width: 422.4px;" width="528" height="263"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-12 col-xl-6">
+                        <div class="bg-light rounded p-4" style="min-height: 450px;">
+                            <h6 class="mb-4">Penjualan Harian (7 Hari Terakhir)</h6>
+                            <div class="chart-container">
+                                <canvas id="daily-sales-chart" style="display: block; box-sizing: border-box; height: 400px; width: 425.6px;" width="532" height="500"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+           
 
             
             <!-- Sales Chart End -->
 
 
             <!-- Recent Sales Start -->
-            <div class="container-fluid pt-4 px-4">
-                
-            </div>
+            
             <!-- Recent Sales End -->
 
 
@@ -273,7 +275,7 @@ foreach ($reservasi as $r):
         <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top" style="display: none;"><i class="bi bi-arrow-up"></i></a>
     </div>
 
-    <!-- JavaScript Libraries -->
+      <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="lib/chart/chart.min.js"></script>
@@ -286,8 +288,7 @@ foreach ($reservasi as $r):
 
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
-
-
+    <script src="js/chart.js"></script>
 </body>
 
 </html>
