@@ -19,6 +19,9 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
     $paymentMethod = $_POST['payment_method'] ?? 'cash';
     $totalAmount = 0;
 
+    // Payment received (only used/displayed for cash)
+    $paymentReceived = isset($_POST['payment_received']) ? floatval($_POST['payment_received']) : 0;
+
     foreach ($cartItems as $item) {
         $totalAmount += $item['price'] * $item['quantity'];
     }
@@ -44,7 +47,14 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
 }
 
        $pdo->commit();
-       header("Location: pos.php?success=1&invoice=" . urlencode($invoiceNumber));
+       // Hitung kembalian (jika ada)
+       $changeAmount = 0;
+       if ($paymentMethod === 'cash') {
+           $changeAmount = $paymentReceived - $totalAmount;
+           if ($changeAmount < 0) $changeAmount = 0; // jangan negatif di tampilan
+       }
+
+       header("Location: pos.php?success=1&invoice=" . urlencode($invoiceNumber) . "&change=" . urlencode(number_format($changeAmount, 2, '.', '')));
        exit;
 
 
@@ -64,7 +74,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
 
 <head>
     <meta charset="utf-8">
-    <title>DASHMIN - Bootstrap Admin Template</title>
+    <title>TRINITY SYSTEM</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -104,10 +114,10 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
 
 
         <!-- Sidebar Start -->
-        <div class="sidebar pe-4 pb-3">
+       <div class="sidebar pe-4 pb-3">
             <nav class="navbar bg-light navbar-light">
                 <a href="index.html" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-hashtag me-2"></i>DASHMIN</h3>
+                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> TRINITY</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -120,14 +130,15 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
+                    
                     <a href="../admin/dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
-                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Menu</a>
-                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-usd me-2"></i>Transaksi</a>
+                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
+                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
                     <a href="../admin/kategori.php" class="nav-item nav-link"><i class="fa fa-check-square me-2"></i>Kategori</a>
-                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-handshake-o me-2"></i>Reservasi</a>
-                    <a href="../admin/user.php" class="nav-item nav-link"><i class="fa fa-users me-2"></i>User</a>
-                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-bar-chart me-2"></i>Laporan</a>
-                    <a href="../admin/pos.php" class="nav-item nav-link active"><i class="fa fa-university me-2"></i>Kasir</a>
+                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
+                    <a href="../admin/user.php" class="nav-item nav-link "><i class="fa fa-users me-2"></i>User</a>
+                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-chart-line me-2"></i>Laporan</a>
+                    <a href="../admin/pos.php" class="nav-item nav-link acttive"><i class="fa fa-university me-2"></i>Kasir</a>
                     
                 </div>
             </nav>
@@ -168,6 +179,9 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
             <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
                 <div class="alert alert-success">
                     Transaksi berhasil! Invoice: <?php echo htmlspecialchars($_GET['invoice']); ?>
+                    <?php if (isset($_GET['change'])): ?>
+                        <br>Kembalian: <?php echo 'Rp ' . number_format((float)$_GET['change'], 0, ',', '.'); ?>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
 
@@ -227,11 +241,18 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
                                 </div>
 
                                 <div class="mb-3">
-                                    <select name="payment_method" class="form-select">
+                                    <select name="payment_method" id="payment-method" class="form-select" onchange="onPaymentMethodChange()">
                                         <option value="cash">Tunai</option>
                                         <option value="card">Kartu</option>
                                         <option value="transfer">Transfer</option>
                                     </select>
+                                </div>
+
+                                <!-- Input pembayaran (hanya relevan untuk tunai) -->
+                                <div class="mb-3" id="payment-received-group" style="display: none;">
+                                    <label>Uang Diterima (Tunai)</label>
+                                    <input type="number" step="0.01" min="0" name="payment_received" id="payment-received" class="form-control" placeholder="Masukkan jumlah uang yang diterima">
+                                    <small class="text-muted">Kembalian: <span id="change-amount">Rp 0</span></small>
                                 </div>
 
                                 <div class="d-grid gap-2">
@@ -278,6 +299,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
    <script>
     // Inisialisasi cart kosong
     let cart = [];
+    let currentTotal = 0;
 
     // Fungsi untuk menambahkan produk ke keranjang
     function addToCart(id, name, price) {
@@ -320,6 +342,10 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
         });
 
         totalEl.textContent = formatCurrency(total);
+        currentTotal = total;
+
+        // Update kembalian jika payment received sudah diisi
+        updateChangeDisplay();
         checkoutBtn.disabled = false;
     }
 
@@ -335,11 +361,63 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'checkout') {
         // Masukkan cart ke input hidden
         document.getElementById('cart-items-input').value = JSON.stringify(cart);
 
-        // Kirim form dengan submit() lalu reload halaman setelahnya
+        const paymentMethod = document.getElementById('payment-method').value;
+
+        if (paymentMethod === 'cash') {
+            const paymentReceivedInput = document.getElementById('payment-received');
+            const paymentVal = parseFloat(paymentReceivedInput.value) || 0;
+            if (paymentVal < currentTotal) {
+                alert('Uang yang diterima kurang dari total.');
+                return;
+            }
+        }
+
+        // Kirim form dengan submit()
         document.getElementById('checkout-form').submit();
 
         // Optional: Bisa juga reload manual setelah delay, tapi tidak perlu kalau pakai PHP redirect
     }
+
+    function onPaymentMethodChange() {
+        const method = document.getElementById('payment-method').value;
+        const group = document.getElementById('payment-received-group');
+        const input = document.getElementById('payment-received');
+        if (method === 'cash') {
+            group.style.display = '';
+            input.disabled = false;
+        } else {
+            group.style.display = 'none';
+            input.disabled = true;
+            input.value = '';
+            document.getElementById('change-amount').textContent = 'Rp 0';
+        }
+    }
+
+    function updateChangeDisplay() {
+        const method = document.getElementById('payment-method').value;
+        if (method !== 'cash') return;
+        const input = document.getElementById('payment-received');
+        const val = parseFloat(input.value) || 0;
+        const change = val - currentTotal;
+        const changeEl = document.getElementById('change-amount');
+        if (change < 0) {
+            changeEl.textContent = 'Kurang ' + formatCurrency(Math.abs(change));
+            changeEl.style.color = 'crimson';
+        } else {
+            changeEl.textContent = formatCurrency(change);
+            changeEl.style.color = 'inherit';
+        }
+    }
+
+    // Event listener untuk input payment
+    document.addEventListener('DOMContentLoaded', function() {
+        const payInput = document.getElementById('payment-received');
+        if (payInput) {
+            payInput.addEventListener('input', updateChangeDisplay);
+        }
+        // inisialisasi tampilan sesuai default method
+        onPaymentMethodChange();
+    });
 
     function formatCurrency(number) {
         return 'Rp ' + number.toLocaleString('id-ID');

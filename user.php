@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once '../admin/config/database.php';
-require_once '../admin/includes/functions.php';
+require_once 'config/database.php';
+require_once 'includes/functions.php';
 
 requireLogin();
 $user= getUsers();
@@ -10,10 +10,18 @@ $user= getUsers();
 if (isset($_POST['submit_baru'])) {
     $nama = $_POST['nama'];
     $username = $_POST['username'];
-    $password = $_POST['password'];;
+    $password = $_POST['password'];
+    $email = $_POST['email'] ?? $username . '@trinity.com';
     $role = $_POST['role'];
 
-    exit;
+    try {
+        $stmt = $pdo->prepare("INSERT INTO users (full_name, username, password, email, role, status) VALUES (?, ?, ?, ?, ?, 'active')");
+        $stmt->execute([$nama, $username, $password, $email, $role]);
+        header("Location: user.php?success=1");
+        exit;
+    } catch (PDOException $e) {
+        $error = "Error: " . $e->getMessage();
+    }
 }
 
 // --- Update User ---
@@ -62,7 +70,7 @@ if (isset($_GET['edit'])) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Icon Font Stylesheet -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -93,8 +101,7 @@ if (isset($_GET['edit'])) {
         <div class="sidebar pe-4 pb-3">
             <nav class="navbar bg-light navbar-light">
                 <a href="index.html" class="navbar-brand mx-4 mb-3">
-                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> 
-  TRINITY</h3>
+                    <h3 class="text-primary"><i class="fa fa-store me-2"></i> TRINITY</h3>
                 </a>
                 <div class="d-flex align-items-center ms-4 mb-4">
                     <div class="position-relative">
@@ -107,16 +114,16 @@ if (isset($_GET['edit'])) {
                     </div>
                 </div>
                 <div class="navbar-nav w-100">
-                    
-                    <a href="../admin/dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
-                    <a href="../admin/menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
-                    <a href="../admin/transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
-                    <a href="../admin/kategori.php" class="nav-item nav-link"><i class="fa fa-check-square me-2"></i>Kategori</a>
-                    <a href="../admin/reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
-                    <a href="../admin/user.php" class="nav-item nav-link"><i class="fa fa-users me-2"></i>User</a>
-                    <a href="../admin/sales.php" class="nav-item nav-link"><i class="fa fa-chart-line me-2"></i>Laporan</a>
-                    <a href="../admin/pos.php" class="nav-item nav-link active"><i class="fa fa-university me-2"></i>Kasir</a>
-                    
+
+                    <a href="dashboard.php" class="nav-item nav-link"><i class="fa fa-th me-2"></i>Dashboard</a>
+                    <a href="menu.php" class="nav-item nav-link"><i class="fa fa-box me-2"></i>Menu</a>
+                    <a href="transaction.php" class="nav-item nav-link"><i class="fa fa-receipt me-2"></i>Transaksi</a>
+                    <a href="kategori.php" class="nav-item nav-link"><i class="fa fa-check-square me-2"></i>Kategori</a>
+                    <a href="reservation.php" class="nav-item nav-link"><i class="fa fa-briefcase me-2"></i>Reservasi</a>
+                    <a href="user.php" class="nav-item nav-link active"><i class="fa fa-users me-2"></i>User</a>
+                    <a href="sales.php" class="nav-item nav-link"><i class="fa fa-chart-line me-2"></i>Laporan</a>
+                    <a href="pos.php" class="nav-item nav-link"><i class="fa fa-university me-2"></i>Kasir</a>
+
                 </div>
             </nav>
         </div>
@@ -134,7 +141,7 @@ if (isset($_GET['edit'])) {
                     <i class="fa fa-bars"></i>
                 </a>
                 <form class="d-none d-md-flex ms-4">
-                    
+
                 </form>
                 <div class="navbar-nav align-items-center ms-auto">
                     <div class="nav-item dropdown">
@@ -168,6 +175,10 @@ if (isset($_GET['edit'])) {
                     <input type="password" name="password" class="form-control" required>
                 </div>
                 <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" name="email" class="form-control" value="<?= $email ?? '' ?>">
+                </div>
+                <div class="mb-3">
                     <label>Role</label><br>
                     <input type="radio" name="role" value="admin" checked> Admin
                     <input type="radio" name="role" value="cashier"> Kasir
@@ -177,9 +188,9 @@ if (isset($_GET['edit'])) {
                 </form>
             </div>
               <?php endif; ?>
-            
+
             </div>
-                        
+
             <div class="col-sm-12 col-xl-6">
             <div class="bg-light rounded h-100 p-4">
             <h6 class="mb-4">Edit User</h6>
@@ -205,10 +216,10 @@ if (isset($_GET['edit'])) {
                 </div>
                 <button type="submit" name="submit_edit" class="btn btn-warning">Update</button>
                 <a href="user.php" class="btn btn-secondary">Batal</a>
-            </form>     
+            </form>
                         </div>
-                    </div> 
-                    
+                    </div>
+
                     <div class="col-12">
                         <div class="bg-light rounded h-100 p-4">
                             <h6 class="mb-4">Tabel User</h6>
@@ -222,7 +233,7 @@ if (isset($_GET['edit'])) {
                                             <th scope="col">Username</th>
                                             <th scope="col">Password</th>
                                             <th scope="col">Role</th>
-                                            
+
                                         </tr>
                                     </thead>
                 <tbody>

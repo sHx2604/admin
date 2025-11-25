@@ -1,20 +1,39 @@
 <?php
-// Authentication functions
-function authenticateUser($username, $password) {
+
+function authUser($username, $password) {
     global $pdo;
 
     $stmt = $pdo->prepare("SELECT id, username, password, full_name, role FROM users WHERE username = ? AND status = 'active'");
-    $stmt->execute([$username]);
+    $stmt->execute([trim($username)]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($password, $user['password'])) {
+    // Perbandingan password plain text
+    if ($user && trim($password) === $user['password']) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['full_name'] = $user['full_name'];
         $_SESSION['role'] = $user['role'];
         return true;
     }
+    return false;
+}
 
+function checkPageAccess($page) {
+    $role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+    $page = strtolower($page);
+    // Daftar akses per role
+    $access = [
+        'admin' => 'all',
+        'cashier' => ['dashboard', 'pos', 'reservation'],
+        'manager' => ['dashboard', 'sales', 'reservation', 'menu', 'transaction', 'kategori']
+    ];
+    if ($role === 'admin') {
+        return true; // Admin bisa akses semua
+    }
+    if (isset($access[$role])) {
+        if ($access[$role] === 'all') return true;
+        return in_array($page, $access[$role]);
+    }
     return false;
 }
 
@@ -196,7 +215,8 @@ function getDashboardStats() {
         'today_revenue' => $today['total_revenue'],
         'total_products' => $products['total_products'],
         'low_stock' => $lowStock['low_stock'],
-        'total_users' => $users['total_users']
+        'total_users' => $users['total_users'],
+        'total_reservation' => isset($result['total_reservation']) ? (int)$result['total_reservation'] : 0
 
     ];
 }
@@ -237,7 +257,7 @@ function getReservations($limit = null) {
 
 
 // File upload function
-function uploadFile($file, $uploadDir = '../adminuploads') {
+function uploadFile($file, $uploadDir = 'uploads/') {
     if (!file_exists($uploadDir)) {
         mkdir($uploadDir, 0777, true);
     }
@@ -297,5 +317,383 @@ function validateUser($data) {
     }
 
     return $errors;
+}
+
+// chart handle
+
+function getWeeklySalesData() {
+    global $pdo;
+
+    $stmt = $pdo->prepare("
+        SELECT DAYNAME(created_at) as hari, SUM(total_amount) as total
+        FROM sales
+        WHERE WEEK(created_at) = WEEK(CURDATE()) AND status = 'completed'
+        GROUP BY DAYNAME(created_at)
+        ORDER BY FIELD(DAYNAME(created_at), 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
+    ");
+    $stmt->execute();
+    $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $hariMap = [
+        'Monday' => 'Senin',
+        'Tuesday' => 'Selasa',
+        'Wednesday' => 'Rabu',
+        'Thursday' => 'Kamis',
+        'Friday' => 'Jumat',
+        'Saturday' => 'Sabtu',
+        'Sunday' => 'Minggu',
+    ];
+
+    $labels = [];
+    $values = [];
+
+    foreach ($hariMap as $eng => $ind) {
+        $found = false;
+        foreach ($data as $row) {
+            if ($row['hari'] === $eng) {
+                $labels[] = $ind;
+                $values[] = (int) $row['total'];
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            $labels[] = $ind;
+            $values[] = 0;
+        }
+    }
+
+    return [
+        'labels' => $labels,
+        'data' => $values
+    ];
+}
+
+
+// Data penjualan harian (7 hari terakhir)
+function getDailySalesData() {
+    global $pdo;
+
+    $stmt = $pdo->prepare("SELECT DATE(created_at) as tanggal, COALESCE(SUM(total_amount),0) as total_penjualan FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND status = 'completed' GROUP BY DATE(created_at) ORDER BY DATE(created_at) ASC");
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $labels = [];
+    $values = [];
+
+    for ($i = 6; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-{$i} days"));
+        $labels[] = date('d/m', strtotime($date));
+        $found = false;
+        foreach ($rows as $r) {
+            if ($r['tanggal'] === $date) {
+                $values[] = (float)$r['total_penjualan'];
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) $values[] = 0;
+    }
+
+    return ['labels' => $labels, 'data' => $values];
+}
+
+// Data reservasi mingguan (hari Senin - Minggu)
+function getWeeklyReservationData() {
+    global $pdo;
+
+    $stmt = $pdo->prepare("SELECT DAYNAME(tanggal) as hari, COUNT(*) as jumlah FROM jumlah_reservasi WHERE WEEK(tanggal_pemesanan) = WEEK(CURDATE()) AND YEAR(tanggal_pemesanan) = YEAR(CURDATE()) GROUP BY DAYNAME(tanggal_pemesanan)");
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $dayOrder = ['Monday'=>'Senin','Tuesday'=>'Selasa','Wednesday'=>'Rabu','Thursday'=>'Kamis','Friday'=>'Jumat','Saturday'=>'Sabtu','Sunday'=>'Minggu'];
+    $labels = [];
+    $values = [];
+    foreach ($dayOrder as $eng => $ind) {
+        $labels[] = $ind;
+        $found = false;
+        foreach ($rows as $r) {
+            if ($r['hari'] === $eng) {
+                $values[] = (int)$r['jumlah'];
+                $found = true; break;
+            }
+        }
+        if (!$found) $values[] = 0;
+    }
+
+    return ['labels' => $labels, 'data' => $values];
+}
+
+// Top products (last 30 days)
+function getTopProductsData($limit = 5) {
+    global $pdo;
+
+    $stmt = $pdo->prepare("SELECT p.name, COALESCE(SUM(si.quantity),0) as total_terjual FROM sale_items si JOIN products p ON si.product_id = p.id JOIN sales s ON si.sale_id = s.id WHERE s.status = 'completed' AND s.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY) GROUP BY p.id, p.name ORDER BY total_terjual DESC LIMIT ?");
+    $stmt->bindValue(1, (int)$limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $labels = [];
+    $values = [];
+    foreach ($rows as $r) {
+        $labels[] = $r['name'];
+        $values[] = (int)$r['total_terjual'];
+    }
+
+    return ['labels' => $labels, 'data' => $values];
+}
+
+// Monthly revenue (last 6 months)
+function getMonthlyRevenueData($months = 6) {
+    global $pdo;
+
+    $stmt = $pdo->prepare("SELECT YEAR(created_at) as tahun, MONTH(created_at) as bulan, COALESCE(SUM(total_amount),0) as total_revenue FROM sales WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? MONTH) AND status = 'completed' GROUP BY YEAR(created_at), MONTH(created_at) ORDER BY YEAR(created_at) ASC, MONTH(created_at) ASC");
+    $stmt->bindValue(1, (int)$months, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $labels = [];
+    $values = [];
+
+    for ($i = $months-1; $i >= 0; $i--) {
+        $date = date('Y-m', strtotime("-{$i} months"));
+        $labels[] = date('M Y', strtotime($date));
+        $year = date('Y', strtotime($date));
+        $month = (int)date('n', strtotime($date));
+
+        $found = false;
+        foreach ($rows as $r) {
+            if ((int)$r['tahun'] == (int)$year && (int)$r['bulan'] == $month) {
+                $values[] = (float)$r['total_revenue'];
+                $found = true; break;
+            }
+        }
+        if (!$found) $values[] = 0;
+    }
+
+    return ['labels' => $labels, 'data' => $values];
+}
+
+// ============ PDF REPORT DATA FUNCTIONS ============
+
+// Get Indonesian day name
+function getIndonesianDay($englishDay) {
+    $days = [
+        'Monday' => 'Senin',
+        'Tuesday' => 'Selasa',
+        'Wednesday' => 'Rabu',
+        'Thursday' => 'Kamis',
+        'Friday' => 'Jumat',
+        'Saturday' => 'Sabtu',
+        'Sunday' => 'Minggu'
+    ];
+    return isset($days[$englishDay]) ? $days[$englishDay] : $englishDay;
+}
+
+// Get daily report data
+function getDailyReportData($date) {
+    global $pdo;
+
+    if (empty($date)) {
+        $date = date('Y-m-d');
+    }
+
+    // Get sales summary
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) as total_transaksi,
+            COALESCE(SUM(total_amount), 0) as total_pendapatan,
+            COALESCE(AVG(total_amount), 0) as rata_rata_transaksi
+        FROM sales
+        WHERE DATE(created_at) = ? AND status = 'completed'
+    ");
+    $stmt->execute([$date]);
+    $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Get top products
+    $stmt = $pdo->prepare("
+        SELECT
+            p.name,
+            SUM(si.quantity) as qty_terjual,
+            SUM(si.total) as total_revenue
+        FROM sale_items si
+        JOIN products p ON si.product_id = p.id
+        JOIN sales s ON si.sale_id = s.id
+        WHERE DATE(s.created_at) = ? AND s.status = 'completed'
+        GROUP BY p.id, p.name
+        ORDER BY qty_terjual DESC
+        LIMIT 10
+    ");
+    $stmt->execute([$date]);
+    $top_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get reservations
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) as jumlah_reservasi,
+            COALESCE(SUM(jumlah_anggota), 0) as total_tamu
+        FROM reservasi
+        WHERE DATE(tanggal_pemesanan) = ?
+    ");
+    $stmt->execute([$date]);
+    $reservations = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return [
+        'date' => $date,
+        'summary' => $summary,
+        'top_products' => $top_products,
+        'reservations' => $reservations
+    ];
+}
+
+// Get weekly report data
+function getWeeklyReportData($week_start) {
+    global $pdo;
+
+    if (empty($week_start)) {
+        $week_start = date('Y-m-d', strtotime('monday this week'));
+    }
+
+    $week_end = date('Y-m-d', strtotime($week_start . ' +6 days'));
+
+    // Get sales summary
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) as total_transaksi,
+            COALESCE(SUM(total_amount), 0) as total_pendapatan,
+            COALESCE(AVG(total_amount), 0) as rata_rata_transaksi
+        FROM sales
+        WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'completed'
+    ");
+    $stmt->execute([$week_start, $week_end]);
+    $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Get daily sales breakdown
+    $stmt = $pdo->prepare("
+        SELECT
+            DATE(created_at) as tanggal,
+            DAYNAME(created_at) as hari,
+            COUNT(*) as jumlah_transaksi,
+            COALESCE(SUM(total_amount), 0) as total_penjualan
+        FROM sales
+        WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'completed'
+        GROUP BY DATE(created_at), DAYNAME(created_at)
+        ORDER BY DATE(created_at)
+    ");
+    $stmt->execute([$week_start, $week_end]);
+    $daily_sales = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get top products
+    $stmt = $pdo->prepare("
+        SELECT
+            p.name,
+            SUM(si.quantity) as qty_terjual,
+            SUM(si.total) as total_revenue
+        FROM sale_items si
+        JOIN products p ON si.product_id = p.id
+        JOIN sales s ON si.sale_id = s.id
+        WHERE DATE(s.created_at) BETWEEN ? AND ? AND s.status = 'completed'
+        GROUP BY p.id, p.name
+        ORDER BY qty_terjual DESC
+        LIMIT 10
+    ");
+    $stmt->execute([$week_start, $week_end]);
+    $top_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return [
+        'week_start' => $week_start,
+        'week_end' => $week_end,
+        'summary' => $summary,
+        'daily_sales' => $daily_sales,
+        'top_products' => $top_products
+    ];
+}
+
+// Get monthly report data
+function getMonthlyReportData($month, $year) {
+    global $pdo;
+
+    if (empty($month) || empty($year)) {
+        $month = date('m');
+        $year = date('Y');
+    }
+
+    // Get date range
+    $start_date = "$year-$month-01";
+    $end_date = date('Y-m-t', strtotime($start_date));
+
+    // Get sales summary
+    $stmt = $pdo->prepare("
+        SELECT
+            COUNT(*) as total_transaksi,
+            COALESCE(SUM(total_amount), 0) as total_pendapatan,
+            COALESCE(AVG(total_amount), 0) as rata_rata_transaksi,
+            MIN(total_amount) as transaksi_terkecil,
+            MAX(total_amount) as transaksi_terbesar
+        FROM sales
+        WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'completed'
+    ");
+    $stmt->execute([$start_date, $end_date]);
+    $summary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Get top products
+    $stmt = $pdo->prepare("
+        SELECT
+            p.name,
+            p.sku,
+            c.name as category,
+            SUM(si.quantity) as qty_terjual,
+            SUM(si.total) as total_revenue,
+            AVG(si.price) as avg_price
+        FROM sale_items si
+        JOIN products p ON si.product_id = p.id
+        LEFT JOIN categories c ON p.category_id = c.id
+        JOIN sales s ON si.sale_id = s.id
+        WHERE DATE(s.created_at) BETWEEN ? AND ? AND s.status = 'completed'
+        GROUP BY p.id, p.name, p.sku, c.name
+        ORDER BY total_revenue DESC
+        LIMIT 15
+    ");
+    $stmt->execute([$start_date, $end_date]);
+    $top_products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get payment method breakdown
+    $stmt = $pdo->prepare("
+        SELECT
+            payment_method,
+            COUNT(*) as jumlah_transaksi,
+            COALESCE(SUM(total_amount), 0) as total_amount
+        FROM sales
+        WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'completed'
+        GROUP BY payment_method
+    ");
+    $stmt->execute([$start_date, $end_date]);
+    $payment_methods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Get daily trend
+    $stmt = $pdo->prepare("
+        SELECT
+            DATE(created_at) as tanggal,
+            COUNT(*) as jumlah_transaksi,
+            COALESCE(SUM(total_amount), 0) as total_penjualan
+        FROM sales
+        WHERE DATE(created_at) BETWEEN ? AND ? AND status = 'completed'
+        GROUP BY DATE(created_at)
+        ORDER BY DATE(created_at)
+    ");
+    $stmt->execute([$start_date, $end_date]);
+    $daily_trend = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return [
+        'month' => $month,
+        'year' => $year,
+        'month_name' => date('F', strtotime($start_date)),
+        'start_date' => $start_date,
+        'end_date' => $end_date,
+        'summary' => $summary,
+        'top_products' => $top_products,
+        'payment_methods' => $payment_methods,
+        'daily_trend' => $daily_trend
+    ];
 }
 ?>
