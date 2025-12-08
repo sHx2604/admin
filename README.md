@@ -692,6 +692,401 @@ A: Saat ini hanya MySQLi. Butuh refactor database layer untuk PostgreSQL/SQLite.
 - catatan: Special notes/requests
 - created_at: Reservation timestamp
 
+## Entity Relationship Diagram (ERD)
+
+### ERD - Struktur Relasi Database
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          RESTAURANT POS DATABASE                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                                    USERS
+                           ┌────────────────────┐
+                           │ id (PK)            │
+                           │ username (UNIQUE)  │
+                           │ password           │
+                           │ full_name          │
+                           │ email (UNIQUE)     │
+                           │ role (enum)        │ ◄──┐
+                           │ status (enum)      │    │
+                           │ created_at         │    │
+                           │ updated_at         │    │
+                           └────────────────────┘    │
+                                  ▲                  │
+                                  │ 1                │
+                                  │                  │
+                            ┌──────┴──────┐          │
+                            │ (user_id)   │          │
+                            │ 1:N         │          │
+                            │             │          │
+                 ┌──────────┘             └────────────────────┐
+                 │                                             │
+                 │                                             │
+              SALES                                        POSTS
+        ┌──────────────────┐                     ┌───────────────────┐
+        │ id (PK)          │                     │ id (PK)           │
+        │ user_id (FK)     │                     │ title             │
+        │ invoice_number   │                     │ slug (UNIQUE)     │
+        │ total_amount     │                     │ content           │
+        │ payment_method   │                     │ excerpt           │
+        │ customer_name    │                     │ featured_image    │
+        │ customer_phone   │                     │ status (enum)     │
+        │ status (enum)    │                     │ author_id (FK)    │
+        │ created_at       │                     │ created_at        │
+        │ updated_at       │                     │ updated_at        │
+        └──────────────────┘                     └───────────────────┘
+              │
+              │ 1
+              │
+              │ (sale_id)
+              │ 1:N
+              │
+         SALE_ITEMS
+       ┌─────────────────────┐
+       │ id (PK)             │
+       │ sale_id (FK)        │ ────────────────┐
+       │ product_id (FK)     │                 │
+       │ product_name        │                 │
+       │ product_sku         │                 │
+       │ quantity            │                 │
+       │ price               │                 │
+       │ total               │                 │
+       │ created_at          │                 │
+       └─────────────────────┘                 │
+              │                                │
+              │ 1                             │
+              │                                │
+              │ (product_id)                  │
+              │ N:1                           │
+              │                                │
+         PRODUCTS                             │
+       ┌──────────────────┐                   │
+       │ id (PK)          │ ◄──────────────────
+       │ category_id (FK) │ ──┐
+       │ name             │   │
+       │ description      │   │
+       │ price            │   │
+       │ cost_price       │   │ 1
+       │ stock            │   │
+       │ min_stock        │   │ (category_id)
+       │ sku (UNIQUE)     │   │ N:1
+       │ image            │   │
+       │ status (enum)    │   │
+       │ created_at       │   │
+       │ updated_at       │   │
+       └──────────────────┘   │
+              ▲                │
+              │                │
+              └────────────────┤
+                               │
+                          CATEGORIES
+                       ┌─────────────────┐
+                       │ id (PK)         │
+                       │ name            │
+                       │ description     │
+                       │ status (enum)   │
+                       │ sort_order      │
+                       │ created_at      │
+                       │ updated_at      │
+                       └─────────────────┘
+
+
+        RESERVASI (Standalone Table)
+       ┌──────────────────────┐
+       │ id (PK)              │
+       │ nama                 │
+       │ no_hp                │
+       │ email                │
+       │ jumlah_anggota       │
+       │ tanggal_pemesanan    │
+       │ status (enum)        │
+       │ catatan              │
+       │ created_at           │
+       │ updated_at           │
+       └──────────────────────┘
+
+
+    JUMLAH_RESERVASI (Statistic Table)
+       ┌──────────────────────┐
+       │ id (PK)              │
+       │ tanggal (UNIQUE)     │
+       │ jumlah               │
+       │ created_at           │
+       └──────────────────────┘
+
+
+         SETTINGS (Configuration)
+       ┌──────────────────────┐
+       │ id (PK)              │
+       │ setting_key (UNIQUE) │
+       │ setting_value        │
+       │ setting_type (enum)  │
+       │ created_at           │
+       │ updated_at           │
+       └──────────────────────┘
+```
+
+### Relasi Detail
+
+**1. USERS ↔ SALES (1:N)**
+- Satu user (kasir) dapat membuat banyak sales
+- `sales.user_id` → `users.id`
+- ON DELETE SET NULL: Jika kasir dihapus, sales tetap ada dengan user_id = NULL
+
+**2. USERS ↔ POSTS (1:N)**
+- Satu user (author) dapat membuat banyak posts
+- `posts.author_id` → `users.id`
+- ON DELETE SET NULL: Post akan tetap ada tanpa author
+
+**3. CATEGORIES ↔ PRODUCTS (1:N)**
+- Satu kategori dapat memiliki banyak produk
+- `products.category_id` → `categories.id`
+- ON DELETE SET NULL: Jika kategori dihapus, produk kategorinya menjadi NULL
+
+**4. PRODUCTS ↔ SALE_ITEMS (1:N)**
+- Satu produk dapat terjual dalam banyak transaksi
+- `sale_items.product_id` → `products.id`
+- ON DELETE SET NULL: Jika produk dihapus, detail penjualan tetap ada (product_id = NULL)
+- Menyimpan product_name & sku untuk history yang akurat
+
+**5. SALES ↔ SALE_ITEMS (1:N)**
+- Satu penjualan dapat memiliki banyak item
+- `sale_items.sale_id` → `sales.id`
+- ON DELETE CASCADE: Jika penjualan dihapus, semua item juga terhapus
+
+**6. RESERVASI (Standalone)**
+- Tabel mandiri tanpa relasi FK
+- Data reservasi dari pelanggan tidak perlu link ke user
+- Statistik disimpan di `jumlah_reservasi`
+
+**7. SETTINGS & JUMLAH_RESERVASI**
+- Tabel konfigurasi & statistik
+- Tidak memiliki relasi FK dengan tabel lain
+
+### Kardinalitas
+
+| Relasi | Tipe | Keterangan |
+|--------|------|-----------|
+| USERS ↔ SALES | 1:N | 1 user membuat N sales |
+| USERS ↔ POSTS | 1:N | 1 author membuat N posts |
+| CATEGORIES ↔ PRODUCTS | 1:N | 1 kategori memiliki N produk |
+| PRODUCTS ↔ SALE_ITEMS | 1:N | 1 produk muncul di N transaksi |
+| SALES ↔ SALE_ITEMS | 1:N | 1 penjualan memiliki N item |
+
+### Cascade Rules
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║ FOREIGN KEY CONSTRAINT BEHAVIOR                                 ║
+╠══════════════════════════════════════════════════════════════════╣
+║ Table        │ FK Column      │ Parent Table │ Action            ║
+╠══════════════════════════════════════════════════════════════════╣
+║ SALES        │ user_id        │ USERS        │ SET NULL          ║
+║ POSTS        │ author_id      │ USERS        │ SET NULL          ║
+║ PRODUCTS     │ category_id    │ CATEGORIES   │ SET NULL          ║
+║ SALE_ITEMS   │ sale_id        │ SALES        │ CASCADE DELETE    ║
+║ SALE_ITEMS   │ product_id     │ PRODUCTS     │ SET NULL          ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+**Penjelasan:**
+- **SET NULL**: Menghapus parent record akan set FK menjadi NULL (data child tetap)
+- **CASCADE DELETE**: Menghapus parent record akan menghapus semua child records
+
+### Indexing Strategy
+
+```
+UNIQUE INDEXES (untuk identifikasi unik):
+├── users.username
+├── users.email
+├── categories.slug (jika ada)
+├── products.sku
+├── sales.invoice_number
+└── posts.slug
+
+SEARCH INDEXES (untuk performa query):
+├── products.name
+├── products.status
+├── sales.created_at
+├── sales.user_id
+├── reservasi.tanggal_pemesanan
+└── posts.status
+
+FOREIGN KEY INDEXES (untuk join performa):
+├── products.category_id
+├── sales.user_id
+├── sale_items.sale_id
+├── sale_items.product_id
+└── posts.author_id
+```
+
+### Database Views
+
+Aplikasi menggunakan 3 materialized views untuk laporan:
+
+```sql
+-- View 1: Laporan Penjualan Harian
+v_daily_sales (tanggal, jumlah_transaksi, total_penjualan, avg_transaksi, payment_method, kasir)
+
+-- View 2: Produk Terlaris
+v_top_products (id, name, sku, category, total_terjual, total_revenue)
+
+-- View 3: Stok Menipis
+v_low_stock (id, name, sku, category, stock, min_stock, kekurangan)
+```
+
+### Diagram Alur Data
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                         FLOW DATA SISTEM                         │
+└──────────────────────────────────────────────────────────────────┘
+
+1. USER MANAGEMENT
+   ┌──────────┐
+   │ User     │ (Admin/Manager/Cashier)
+   │ Register │ ──────> INSERT INTO users
+   └──────────┘ (username, password, full_name, email, role)
+
+
+2. PRODUCT SETUP
+   ┌──────────┐      ┌──────────┐
+   │Category  │ ──-> │ Product  │ ──────> INSERT INTO products
+   │Management│      │Management│ (category_id FK, sku, price, stock)
+   └──────────┘      └──────────┘
+
+
+3. POINT OF SALE TRANSACTION
+   ┌────────────────────────────────────────────────────────┐
+   │                    POS CHECKOUT FLOW                   │
+   └────────────────────────────────────────────────────────┘
+
+   a) Kasir login (users auth)
+   b) Add products to cart (from PRODUCTS)
+   c) Click checkout
+   d) SELECT from PRODUCTS WHERE id IN (...)
+   e) INSERT INTO sales (user_id, invoice_number, total_amount, payment_method)
+   f) INSERT INTO sale_items (sale_id, product_id, quantity, price, total)
+   g) UPDATE products SET stock = stock - quantity
+   h) Return invoice_number ke customer
+   
+
+4. RESERVATION SYSTEM
+   ┌──────────────────┐
+   │ Customer Reserve │ ──────> INSERT INTO reservasi
+   │ (Public Form)    │ (nama, no_hp, email, jumlah_anggota, tanggal)
+   └──────────────────┘
+                         ──────> UPDATE jumlah_reservasi (trigger)
+
+
+5. REPORTING SYSTEM
+   ┌──────────────────┐
+   │ Generate Report  │ ──────> SELECT FROM v_daily_sales
+   │ (Filter Date)    │ ──────> SELECT FROM v_top_products
+   └──────────────────┘ ──────> SELECT FROM v_low_stock
+```
+
+### Contoh Query Relational
+
+**Query 1: Laporan Penjualan dengan Detail Kasir**
+```sql
+SELECT 
+    s.invoice_number,
+    s.created_at,
+    u.full_name as kasir_name,
+    s.customer_name,
+    s.total_amount,
+    s.payment_method,
+    COUNT(si.id) as item_count
+FROM sales s
+LEFT JOIN users u ON s.user_id = u.id
+LEFT JOIN sale_items si ON s.id = si.sale_id
+WHERE DATE(s.created_at) = CURDATE()
+GROUP BY s.id;
+-- Menggunakan relasi: SALES.user_id → USERS.id, SALES.id → SALE_ITEMS.sale_id
+```
+
+**Query 2: Produk Terlaris Per Kategori**
+```sql
+SELECT 
+    c.name as kategori,
+    p.name as produk,
+    p.sku,
+    SUM(si.quantity) as terjual,
+    SUM(si.total) as revenue,
+    (SUM(si.total) - (p.cost_price * SUM(si.quantity))) as profit
+FROM products p
+JOIN categories c ON p.category_id = c.id
+LEFT JOIN sale_items si ON p.id = si.product_id
+GROUP BY p.id
+ORDER BY revenue DESC;
+-- Menggunakan relasi: PRODUCTS.category_id → CATEGORIES.id, PRODUCTS.id → SALE_ITEMS.product_id
+```
+
+**Query 3: Monitoring Stok Rendah**
+```sql
+SELECT 
+    c.name as kategori,
+    p.name as produk,
+    p.sku,
+    p.stock,
+    p.min_stock,
+    (p.min_stock - p.stock) as kekurangan_stok,
+    (p.min_stock - p.stock) * p.cost_price as nilai_kekurangan
+FROM products p
+JOIN categories c ON p.category_id = c.id
+WHERE p.stock <= p.min_stock AND p.status = 'active'
+ORDER BY kekurangan_stok DESC;
+-- Menggunakan relasi: PRODUCTS.category_id → CATEGORIES.id
+```
+
+**Query 4: Statistic Kasir Performance**
+```sql
+SELECT 
+    u.full_name as kasir,
+    u.role,
+    COUNT(DISTINCT s.id) as total_transaksi,
+    SUM(s.total_amount) as total_penjualan,
+    AVG(s.total_amount) as avg_transaksi,
+    MIN(s.created_at) as first_sale,
+    MAX(s.created_at) as last_sale
+FROM users u
+LEFT JOIN sales s ON u.id = s.user_id AND s.status = 'completed'
+WHERE u.role IN ('cashier', 'manager')
+GROUP BY u.id;
+-- Menggunakan relasi: USERS.id ← SALES.user_id
+```
+
+### ERD Summary - Ringkasan Struktur Database
+
+| Aspek | Detail |
+|-------|--------|
+| **Total Tables** | 9 tables (Core + Support) |
+| **Core Tables** | users, categories, products, sales, sale_items, reservasi |
+| **Support Tables** | jumlah_reservasi, posts, settings |
+| **Total FK Relations** | 8 foreign key relationships |
+| **Total Unique Constraints** | 7 UNIQUE keys |
+| **Database Engine** | InnoDB (for transactions & FK support) |
+| **Charset** | utf8mb4 (Unicode support) |
+
+**Data Integrity Features:**
+- ✅ Foreign Key Constraints dengan ON DELETE rules
+- ✅ Unique Constraints untuk username, email, sku, invoice_number
+- ✅ Primary Key pada semua tables
+- ✅ Timestamps (created_at, updated_at) untuk audit trail
+- ✅ ENUM types untuk status validation di database level
+- ✅ Decimal type untuk currency fields
+- ✅ Triggers untuk auto-update jumlah_reservasi
+- ✅ Stored Procedures untuk operasi stok
+- ✅ Views untuk complex reporting queries
+
+**Performance Optimizations:**
+- 15+ indexes untuk fast queries
+- Proper normalization untuk reduce redundancy
+- Denormalization pada sale_items (product_name, product_sku) untuk history accuracy
+- Cascade delete pada sale_items untuk data consistency
+
 ## Development & Extension
 
 To add new features, follow this pattern:
