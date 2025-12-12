@@ -304,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                 <div class="card-content">
 
                   <h3 class="title-4 card-title">
-                    <a href="#">Nasi-Goreng</a>
+                    <a href="#">Cap Cay</a>
                   </h3>
 
                   <a href="#" class="btn-text hover-underline label-2">View Menu</a>
@@ -327,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                 <div class="card-content">
 
                   <h3 class="title-4 card-title">
-                    <a href="#">Bakmi-Jawa</a>
+                    <a href="#">Nasi Goreng</a>
                   </h3>
 
                   <a href="#" class="btn-text hover-underline label-2">View Menu</a>
@@ -350,7 +350,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                 <div class="card-content">
 
                   <h3 class="title-4 card-title">
-                    <a href="#">Cap-Cay</a>
+                    <a href="#">Bakmi Goreng</a>
                   </h3>
 
                   <a href="#" class="btn-text hover-underline label-2">View Menu</a>
@@ -412,10 +412,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
             <div class="abs-img abs-img-1 has-before" data-parallax-item data-parallax-speed="1.75">
               <img src="./assets front/images/about-abs-image.jpg" width="285" height="285" loading="lazy" alt=""
                 class="w-100">
-            </div>
-
-            <div class="abs-img abs-img-2 has-before">
-              <img src="./assets front/images/badge-2.png" width="133" height="134" loading="lazy" alt="">
             </div>
 
           </figure>
@@ -511,7 +507,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
               <div class="menu-card hover:card">
 
                 <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets front/images/menu-1.png" width="100" height="100" loading="lazy" alt="Lasagne" class="img-cover">
+                  <img src="./assets front/images/bak gr.png" width="100" height="100" loading="lazy" alt="Lasagne" class="img-cover">
                 </figure>
 
                 <div>
@@ -535,20 +531,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
               <div class="menu-card hover:card">
 
                 <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets front/images/menu-1.png" width="100" height="100" loading="lazy" alt="Butternut Pumpkin" class="img-cover">
+                  <img src="./assets front/images/pak.png" width="100" height="100" loading="lazy" alt="Butternut Pumpkin" class="img-cover">
                 </figure>
 
                 <div>
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Nasi-Goreng Ayam</a>
+                      <a href="#" class="card-title">Pak-lay Sayur</a>
                     </h3>
 
                 </span>
                   </div>
 
-                  <p class="card-text label-1">Nasi goreng topping telur dan ayam dicampur dimasakan</p>
+                  <p class="card-text label-1">Paklay Sayur</p>
 
                 </div>
 
@@ -559,7 +555,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
               <div class="menu-card hover:card">
 
                 <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets front/images/menu-1.png" width="100" height="100" loading="lazy" alt="Tokusen Wagyu" class="img-cover">
+                  <img src="./assets front/images/cap gr.png" width="100" height="100" loading="lazy" alt="Tokusen Wagyu" class="img-cover">
                 </figure>
 
                 <div>
@@ -585,7 +581,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
               <div class="menu-card hover:card">
 
                 <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets front/images/menu-1.png" width="100" height="100" loading="lazy" alt="Olivas Rellenas" class="img-cover">
+                  <img src="./assets front/images/bak gr.png" width="100" height="100" loading="lazy" alt="Olivas Rellenas" class="img-cover">
                 </figure>
 
                 <div>
@@ -609,7 +605,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
               <div class="menu-card hover:card">
 
                 <figure class="card-banner img-holder" style="--width: 100; --height: 100;">
-                  <img src="./assets front/images/menu-1.png" width="100" height="100" loading="lazy" alt="Opu Fish" class="img-cover">
+                  <img src="./assets front/images/cap go.png" width="100" height="100" loading="lazy" alt="Opu Fish" class="img-cover">
                 </figure>
 
                 <div>

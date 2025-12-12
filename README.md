@@ -1070,16 +1070,6 @@ GROUP BY u.id;
 | **Database Engine** | InnoDB (for transactions & FK support) |
 | **Charset** | utf8mb4 (Unicode support) |
 
-**Data Integrity Features:**
-- ✅ Foreign Key Constraints dengan ON DELETE rules
-- ✅ Unique Constraints untuk username, email, sku, invoice_number
-- ✅ Primary Key pada semua tables
-- ✅ Timestamps (created_at, updated_at) untuk audit trail
-- ✅ ENUM types untuk status validation di database level
-- ✅ Decimal type untuk currency fields
-- ✅ Triggers untuk auto-update jumlah_reservasi
-- ✅ Stored Procedures untuk operasi stok
-- ✅ Views untuk complex reporting queries
 
 **Performance Optimizations:**
 - 15+ indexes untuk fast queries
