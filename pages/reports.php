@@ -5,25 +5,11 @@ requireRole(['admin', 'manager']);
 
 $page_title = 'Laporan Penjualan';
 
-// Get filter parameters
-$period = $_GET['period'] ?? 'daily';
+// Get filter parameters - use custom date range
 $date_from = $_GET['date_from'] ?? date('Y-m-d');
 $date_to = $_GET['date_to'] ?? date('Y-m-d');
 
-// Auto set date range based on period
-if (isset($_GET['period'])) {
-    if ($period == 'daily') {
-        $date_from = $date_to = date('Y-m-d');
-    } elseif ($period == 'weekly') {
-        $date_from = date('Y-m-d', strtotime('-7 days'));
-        $date_to = date('Y-m-d');
-    } elseif ($period == 'monthly') {
-        $date_from = date('Y-m-01');
-        $date_to = date('Y-m-d');
-    }
-}
-
-$report = getSalesReport($period, $date_from, $date_to);
+$report = getSalesReport('custom', $date_from, $date_to);
 $product_report = getProductSalesReport($date_from, $date_to);
 
 include '../includes/header.php';
@@ -41,16 +27,6 @@ include '../includes/navbar.php';
             </div>
             <div class="card-body">
                 <form method="GET" class="form-row">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label class="form-label">Periode</label>
-                        <select name="period" class="form-control" onchange="this.form.submit()">
-                            <option value="daily" <?= $period == 'daily' ? 'selected' : '' ?>>Hari Ini</option>
-                            <option value="weekly" <?= $period == 'weekly' ? 'selected' : '' ?>>7 Hari Terakhir</option>
-                            <option value="monthly" <?= $period == 'monthly' ? 'selected' : '' ?>>Bulan Ini</option>
-                            <option value="custom" <?= $period == 'custom' ? 'selected' : '' ?>>Custom</option>
-                        </select>
-                    </div>
-
                     <div class="form-group" style="margin-bottom: 0;">
                         <label class="form-label">Dari Tanggal</label>
                         <input type="date" name="date_from" class="form-control" value="<?= $date_from ?>">

@@ -9,32 +9,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'create') {
-        $data = [
-            'nama' => sanitizeInput($_POST['nama']),
-            'no_hp' => sanitizeInput($_POST['no_hp']),
-            'email' => sanitizeInput($_POST['email']),
-            'jumlah_anggota' => $_POST['jumlah_anggota'],
-            'tanggal_pemesanan' => $_POST['tanggal_pemesanan'],
-            'catatan' => sanitizeInput($_POST['catatan'])
-        ];
+        // Convert datetime-local format (YYYY-MM-DDTHH:mm) to MySQL DATETIME (YYYY-MM-DD HH:mm:ss)
+        $tanggal = $_POST['tanggal_pemesanan'] ?? '';
+        
+        // Validate datetime format
+        if (empty($tanggal) || !preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $tanggal)) {
+            $success = 'Tanggal pemesanan tidak valid!';
+        } else {
+            $tanggal = str_replace('T', ' ', $tanggal) . ':00';
+            
+            $data = [
+                'nama' => sanitizeInput($_POST['nama']),
+                'no_hp' => sanitizeInput($_POST['no_hp']),
+                'email' => sanitizeInput($_POST['email']),
+                'jumlah_anggota' => (int)$_POST['jumlah_anggota'],
+                'tanggal_pemesanan' => $tanggal,
+                'catatan' => sanitizeInput($_POST['catatan'])
+            ];
 
-        if (createReservation($data)) {
-            $success = 'Reservasi berhasil ditambahkan!';
+            if (createReservation($data)) {
+                $success = 'Reservasi berhasil ditambahkan!';
+            }
         }
     } elseif ($action === 'update') {
         $id = $_POST['id'];
-        $data = [
-            'nama' => sanitizeInput($_POST['nama']),
-            'no_hp' => sanitizeInput($_POST['no_hp']),
-            'email' => sanitizeInput($_POST['email']),
-            'jumlah_anggota' => $_POST['jumlah_anggota'],
-            'tanggal_pemesanan' => $_POST['tanggal_pemesanan'],
-            'status' => $_POST['status'],
-            'catatan' => sanitizeInput($_POST['catatan'])
-        ];
+        
+        // Convert datetime-local format (YYYY-MM-DDTHH:mm) to MySQL DATETIME (YYYY-MM-DD HH:mm:ss)
+        $tanggal = $_POST['tanggal_pemesanan'] ?? '';
+        
+        // Validate datetime format
+        if (empty($tanggal) || !preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/', $tanggal)) {
+            $success = 'Tanggal pemesanan tidak valid!';
+        } else {
+            $tanggal = str_replace('T', ' ', $tanggal) . ':00';
+            
+            $data = [
+                'nama' => sanitizeInput($_POST['nama']),
+                'no_hp' => sanitizeInput($_POST['no_hp']),
+                'email' => sanitizeInput($_POST['email']),
+                'jumlah_anggota' => (int)$_POST['jumlah_anggota'],
+                'tanggal_pemesanan' => $tanggal,
+                'status' => $_POST['status'],
+                'catatan' => sanitizeInput($_POST['catatan'])
+            ];
 
-        if (updateReservation($id, $data)) {
-            $success = 'Reservasi berhasil diupdate!';
+            if (updateReservation($id, $data)) {
+                $success = 'Reservasi berhasil diupdate!';
+            }
         }
     } elseif ($action === 'delete') {
         $id = $_POST['id'];
@@ -98,7 +119,7 @@ include '../includes/navbar.php';
                                     </span>
                                 </td>
                                 <td class="table-actions">
-                                    <button class="btn btn-sm btn-primary" onclick='editReservation(<?= json_encode($reservation) ?>)'>
+                                    <button class="btn btn-sm btn-primary" onclick="editReservation(<?= htmlspecialchars(json_encode($reservation), ENT_QUOTES, 'UTF-8') ?>)">
                                         Edit
                                     </button>
                                     <form method="POST" style="display: inline;" onsubmit="return confirmDelete();">
@@ -244,9 +265,12 @@ function editReservation(reservation) {
     $('#edit_email').value = reservation.email;
     $('#edit_jumlah_anggota').value = reservation.jumlah_anggota;
 
-    // Format datetime for datetime-local input
-    const datetime = reservation.tanggal_pemesanan.replace(' ', 'T').substring(0, 16);
-    $('#edit_tanggal_pemesanan').value = datetime;
+    // Format datetime from database (YYYY-MM-DD HH:mm:ss) to datetime-local (YYYY-MM-DDTHH:mm)
+    if (reservation.tanggal_pemesanan) {
+        // Input datetime-local expects format YYYY-MM-DDTHH:mm
+        const datetime = reservation.tanggal_pemesanan.substring(0, 16).replace(' ', 'T');
+        $('#edit_tanggal_pemesanan').value = datetime;
+    }
 
     $('#edit_status').value = reservation.status;
     $('#edit_catatan').value = reservation.catatan || '';

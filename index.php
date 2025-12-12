@@ -2,6 +2,7 @@
 require_once 'core/functions.php';
 require_once 'config/database.php';
 
+startSession();
 
 // Proses simpan data reservasi
 $reservation_success = false;
@@ -13,8 +14,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
     $tanggal_pemesanan = $_POST['tanggal_pemesanan'] ?? '';
 
     if ($nama && $no_hp && $email && $jumlah_anggota && $tanggal_pemesanan) {
-        $stmt = $pdo->prepare("INSERT INTO reservasi (nama, no_hp, email, jumlah_anggota, tanggal_pemesanan) VALUES (?, ?, ?, ?, ?)");
-        $reservation_success = $stmt->execute([$nama, $no_hp, $email, $jumlah_anggota, $tanggal_pemesanan]);
+        $data = [
+            'nama' => sanitizeInput($nama),
+            'no_hp' => sanitizeInput($no_hp),
+            'email' => sanitizeInput($email),
+            'jumlah_anggota' => (int)$jumlah_anggota,
+            'tanggal_pemesanan' => $tanggal_pemesanan,
+            'catatan' => ''
+        ];
+        $reservation_success = createReservation($data);
     }
 }
 ?>
@@ -131,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
           </li>
 
           <li class="navbar-item">
-            <a href="..auth/login.php" class="navbar-link hover-underline">
+            <a href="auth/login.php" class="navbar-link hover-underline">
               <div class="separator"></div>
 
               <span class="span">Staff</span>

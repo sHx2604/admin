@@ -153,7 +153,8 @@ include '../includes/navbar.php';
 
                     <div class="form-group">
                         <label class="form-label">SKU</label>
-                        <input type="text" name="sku" class="form-control" required>
+                        <input type="text" name="sku" class="form-control" placeholder="Kosongkan untuk auto-generate">
+                        <small class="form-text">Biarkan kosong untuk generate otomatis</small>
                     </div>
                 </div>
 
@@ -233,7 +234,8 @@ include '../includes/navbar.php';
 
                     <div class="form-group">
                         <label class="form-label">SKU</label>
-                        <input type="text" name="sku" id="edit_sku" class="form-control" required>
+                        <input type="text" name="sku" id="edit_sku" class="form-control" placeholder="Kosongkan untuk auto-generate">
+                        <small class="form-text">Biarkan kosong untuk generate otomatis</small>
                     </div>
                 </div>
 

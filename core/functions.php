@@ -48,7 +48,11 @@ function isLoggedIn() {
 
 function checkAuth() {
     if (!isLoggedIn()) {
-        header('Location: /restaurant-pos/auth/login.php');
+        // Menggunakan relative path yang lebih fleksibel
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        $script_path = dirname(dirname($_SERVER['PHP_SELF']));
+        header('Location: ' . $protocol . '://' . $host . $script_path . '/auth/login.php');
         exit;
     }
 }
@@ -226,6 +230,12 @@ function getProductById($id) {
 
 function createProduct($data) {
     $db = getDBConnection();
+
+    // Auto-generate SKU if empty
+    if (empty($data['sku']) || $data['sku'] === '0') {
+        $data['sku'] = 'SKU-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+    }
+
     $query = "INSERT INTO products (category_id, name, description, price, cost_price, stock, min_stock, sku, image, status, created_at, updated_at)
               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())";
 
@@ -248,6 +258,12 @@ function createProduct($data) {
 
 function updateProduct($id, $data) {
     $db = getDBConnection();
+
+    // Auto-generate SKU if empty or '0'
+    if (empty($data['sku']) || $data['sku'] === '0') {
+        $data['sku'] = 'SKU-' . strtoupper(substr(md5(uniqid(rand(), true)), 0, 8));
+    }
+
     $query = "UPDATE products SET
               category_id = ?, name = ?, description = ?, price = ?, cost_price = ?,
               stock = ?, min_stock = ?, sku = ?, image = ?, status = ?, updated_at = NOW()
@@ -522,7 +538,7 @@ function createReservation($data) {
               VALUES (?, ?, ?, ?, ?, 'pending', ?, NOW(), NOW())";
 
     $stmt = $db->prepare($query);
-    $stmt->bind_param("sssiss",
+    $stmt->bind_param("ssisss",
         $data['nama'],
         $data['no_hp'],
         $data['email'],
@@ -542,7 +558,8 @@ function updateReservation($id, $data) {
               WHERE id = ?";
 
     $stmt = $db->prepare($query);
-    $stmt->bind_param("ssssissi",
+    // Type string: nama(s), no_hp(s), email(s), jumlah_anggota(i), tanggal_pemesanan(s), status(s), catatan(s), id(i)
+    $stmt->bind_param("ssisssi",
         $data['nama'],
         $data['no_hp'],
         $data['email'],

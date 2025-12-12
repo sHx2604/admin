@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <h1>Trinity Restaurant</h1>
+                <h1>Trinity</h1>
                 <p>Point of Sale System</p>
             </div>
 
@@ -61,12 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border);">
-                <p style="font-size: 12px; color: var(--secondary); text-align: center;">
-                    <strong>Demo Accounts:</strong><br>
-                    Admin: admin / admin123<br>
-                    Kasir: kasir1 / kasir123<br>
-                    Manager: manager1 / manager123
-                </p>
+                
             </div>
         </div>
     </div>
