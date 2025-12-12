@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
     <div class="container">
 
       <a href="<section>'home'" class="logo">
-        <img src="./assets front/images/logo.svg" width="160" height="50" alt="Grilli - Home">
+        <img src="./assets front/images/logo.png" width="160" height="50" alt="Grilli - Home">
       </a>
 
       <nav class="navbar" data-navbar>
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
         </button>
 
         <a href="#home" class="logo">
-          <img src="./assets front/images/logo.svg" width="160" height="50" alt="Grilli - Home">
+          <img src="./assets front/images/logo.png" width="160" height="50">
         </a>
 
         <ul class="navbar-list">
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
           </li>
 
           <li class="navbar-item">
-            <a href="../adm/auth/login.php" class="navbar-link hover-underline">
+            <a href="..auth/login.php" class="navbar-link hover-underline">
               <div class="separator"></div>
 
               <span class="span">Staff</span>
@@ -192,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
               Datanglah bersama keluarga & rasakan nikmatnya hidangan yang menggugah selera
             </p>
 
-            <a href="#" class="btn btn-primary slider-reveal">
+            <a href="#menu" class="btn btn-primary slider-reveal">
               <span class="text text-1">Menu Kami</span>
 
               <span class="text text-2" aria-hidden="true">Menu Kami</span>
@@ -217,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                Suasana hangat, rasa otentik, untuk momen tak terlupakan bersama orang tercinta
             </p>
 
-            <a href="#" class="btn btn-primary slider-reveal">
+            <a href="#menu" class="btn btn-primary slider-reveal">
               <span class="text text-1">Menu Kami</span>
 
               <span class="text text-2" aria-hidden="true">Menu Kami</span>
@@ -242,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                Ajak keluarga bersantap & ciptakan kenangan manis dengan hidangan pilihan
             </p>
 
-            <a href="#" class="btn btn-primary slider-reveal">
+            <a href="#menu" class="btn btn-primary slider-reveal">
               <span class="text text-1">Menu Kami</span>
 
               <span class="text text-2" aria-hidden="true">Menu Kami</span>
@@ -294,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
             <li>
               <div class="service-card">
 
-                <a href="#" class="has-before hover:shine">
+                <a class="has-before hover:shine">
                   <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
                     <img src="./assets front/images/service-1.jpg" width="285" height="336" loading="lazy" alt="Breakfast"
                       class="img-cover">
@@ -304,10 +304,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                 <div class="card-content">
 
                   <h3 class="title-4 card-title">
-                    <a href="#">Cap Cay</a>
+                    <a>Cap Cay</a>
                   </h3>
-
-                  <a href="#" class="btn-text hover-underline label-2">View Menu</a>
 
                 </div>
 
@@ -317,7 +315,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
             <li>
               <div class="service-card">
 
-                <a href="#" class="has-before hover:shine">
+                <a class="has-before hover:shine">
                   <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
                     <img src="./assets front/images/service-2.jpg" width="285" height="336" loading="lazy" alt="Appetizers"
                       class="img-cover">
@@ -327,10 +325,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                 <div class="card-content">
 
                   <h3 class="title-4 card-title">
-                    <a href="#">Nasi Goreng</a>
+                    <a>Nasi Goreng</a>
                   </h3>
-
-                  <a href="#" class="btn-text hover-underline label-2">View Menu</a>
 
                 </div>
 
@@ -340,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
             <li>
               <div class="service-card">
 
-                <a href="#" class="has-before hover:shine">
+                <a class="has-before hover:shine">
                   <figure class="card-banner img-holder" style="--width: 285; --height: 336;">
                     <img src="./assets front/images/service-3.jpg" width="285" height="336" loading="lazy" alt="Drinks"
                       class="img-cover">
@@ -350,10 +346,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
                 <div class="card-content">
 
                   <h3 class="title-4 card-title">
-                    <a href="#">Bakmi Goreng</a>
+                    <a>Bakmi Goreng</a>
                   </h3>
-
-                  <a href="#" class="btn-text hover-underline label-2">View Menu</a>
 
                 </div>
 
@@ -432,7 +426,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
       <section class="special-dish text-center" aria-labelledby="dish-label">
 
         <div class="special-dish-banner">
-          <img src="./assets front/images/special-dish-banner.jpg" width="940" height="900" loading="lazy" alt="special dish"
+          <img src="./assets front/images/service-2.jpg" width="940" height="900" loading="lazy" alt="special dish"
             class="img-cover">
         </div>
 
@@ -450,7 +444,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
             </p>
 
 
-            <a href="#" class="btn btn-primary">
+            <a href="#menu" class="btn btn-primary">
               <span class="text text-1">Lihat Menu kami</span>
 
               <span class="text text-2" aria-hidden="true">View All Menu</span>
@@ -493,7 +487,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Nasi-Goreng</a>
+                      <a class="card-title">Nasi-Goreng</a>
                     </h3>
 
                 
@@ -514,7 +508,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Bakmi-Jawa Godog</a>
+                      <a class="card-title">Bakmi-Jawa Godog</a>
                     </h3>
 
                     
@@ -538,7 +532,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Pak-lay Sayur</a>
+                      <a class="card-title">Pak-lay Sayur</a>
                     </h3>
 
                 </span>
@@ -562,7 +556,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Cap-Cay Goreng</a>
+                      <a class="card-title">Cap-Cay Goreng</a>
                     </h3>
 
                     
@@ -588,7 +582,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Bakmi-Jawa Goreng</a>
+                      <a class="card-title">Bakmi-Jawa Goreng</a>
                     </h3>
 
                  
@@ -612,7 +606,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
                   <div class="title-wrapper">
                     <h3 class="title-3">
-                      <a href="#" class="card-title">Cap-Cay Godog</a>
+                      <a class="card-title">Cap-Cay Godog</a>
                     </h3>
 
                   </div>
@@ -626,12 +620,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
 
           </ul>
 
-
-          <a href="menu.php" class="btn btn-primary">
-            <span class="text text-1">Lihat Semua Menu</span>
-
-            <span class="text text-2" aria-hidden="true">Lihat Semua Menu</span>
-          </a>
 
           <img src="./assets front/images/shape-5.png" width="921" height="1036" loading="lazy" alt="shape" class="shape shape-2 move-anim">
           <img src="./assets front/images/shape-6.png" width="343" height="345" loading="lazy" alt="shape" class="shape shape-3 move-anim">
@@ -862,7 +850,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
         <div class="footer-brand has-before has-after">
 
           <a href="#" class="logo">
-            <img src="./assets front/images/logo.svg" width="160" height="50" loading="lazy" alt="grilli home">
+            <img src="./assets front/images/logo.png" width="160" height="50" loading="lazy" alt="grilli home">
           </a>
 
           <address class="body-4">
@@ -882,23 +870,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
         <ul class="footer-list">
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Home</a>
+            <a href="#home" class="label-2 footer-link hover-underline">Home</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Menu</a>
+            <a href="#menu" class="label-2 footer-link hover-underline">Menu</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Tentang Kami</a>
+            <a href="#about" class="label-2 footer-link hover-underline">Tentang Kami</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Kontak</a>
+            <a href="#reservation" class="label-2 footer-link hover-underline">Kontak</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Staff</a>
+            <a href="../auth/login.php" class="label-2 footer-link hover-underline">Staff</a>
           </li>
 
         </ul>
@@ -906,19 +894,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_submit'])
         <ul class="footer-list">
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Go-Food</a>
+            <a class="label-2 footer-link hover-underline">Go-Food</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Shopee-Food</a>
+            <a class="label-2 footer-link hover-underline">Shopee-Food</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Grab-Food</a>
+            <a class="label-2 footer-link hover-underline">Grab-Food</a>
           </li>
 
           <li>
-            <a href="#" class="label-2 footer-link hover-underline">Google Map</a>
+            <a class="label-2 footer-link hover-underline">Google Map</a>
           </li>
 
         </ul>
